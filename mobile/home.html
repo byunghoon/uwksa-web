@@ -1,0 +1,136 @@
+<div id="HMView" ng-show="show.home">
+	<div id="HMBannerWrapper">
+		<div class="HMQuickMessage" ng-show="message">{{message}}</div>
+	</div>
+
+	<div id="HMFirstWrapper">
+		<div id="HMFirstOuterBox">
+			<div id="HMFirstInnerBox">
+				<div id="HMNews">
+					<div class="boardName"><a href="#!/news">공지사항</a></div>
+					<ul>
+						<li ng-repeat="post in HOME.news" ng-class="{open:post.open}">
+							<div class="heading">
+								<div class="date">{{post.month}} {{post.date}}</div>
+								<div class="title"><a href="#!/news/{{post.postId}}">{{post.title}}</a></div>
+								<div class="underline"></div>
+							</div>
+							<div class="preview" ng-show="post.open">{{post.pureContent}}</div>
+							<div class="continue" ng-show="post.open"><a href="#!/news/{{post.postId}}">Continue reading...</a></div>
+							<div class="expand" ng-show="!post.open" ng-click="HOME.OnExpandClick($index)"></div>
+						</li>
+					</ul>
+				</div>
+
+				<div id="HMQna">
+					<div class="boardName"><a href="#!/qna">질문 &amp; 답변</a></div>
+					<ul>
+						<li ng-repeat="post in HOME.qna">
+							<div class="container">
+								<span class="title"><a href="#!/qna/{{post.postId}}">{{post.title}}</a></span>
+								<span class="answers" ng-show="post.commentCount>1">{{post.commentCount}} answers</span>
+								<span class="answers" ng-show="post.commentCount==1">1 answer</span>
+								<span class="answers" ng-show="post.commentCount==0">no answer</span>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="HMSecondWrapper">
+		<div id="HMSecondBox">
+			<div class="row">
+				<div class="col top left">
+					<div class="heading">
+						<a href="#!/column"><div class="boardName math">칼럼</div><div class="more">더 보기</div></a>
+					</div>
+					<ul>
+						<li ng-repeat="post in HOME.column">
+							<div class="date">{{post.month}} {{post.date}}</div>
+							<div class="title"><a href="#!/column/{{post.postId}}">{{post.title}}</a></div>
+						</li>
+					</ul>
+				</div>
+				<div class="col top mid">
+					<div class="heading">
+						<a href="#!/sublet"><div class="boardName sci">서블렛</div><div class="more">더 보기</div></a>
+					</div>
+					<ul>
+						<li ng-repeat="post in HOME.sublet">
+							<div class="date">{{post.month}} {{post.date}}</div>
+							<div class="title"><a href="#!/sublet/{{post.postId}}">{{post.title}}</a></div>
+						</li>
+					</ul>
+				</div>
+				<div class="col top right">
+					<div class="heading">
+						<a href="#!/tutors"><div class="boardName eng">튜터</div><div class="more">더 보기</div></a>
+					</div>
+					<ul>
+						<li ng-repeat="post in HOME.tutors">
+							<div class="date">{{post.month}} {{post.date}}</div>
+							<div class="title"><a href="#!/tutors/{{post.postId}}">{{post.title}}</a></div>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col bottom left">
+					<div class="heading">
+						<a href="#!/bns"><div class="boardName art">장터</div><div class="more">더 보기</div></a>
+					</div>
+					<ul>
+						<li ng-repeat="post in HOME.bns">
+							<div class="date">{{post.month}} {{post.date}}</div>
+							<div class="title"><a href="#!/bns/{{post.postId}}">{{post.title}}</a></div>
+						</li>
+					</ul>
+				</div>
+				<div class="col bottom mid">
+					<div class="heading">
+						<a href="#!/exams"><div class="boardName ahs">족보</div><div class="more">더 보기</div></a>
+					</div>
+					<ul>
+						<li ng-repeat="post in HOME.exams">
+							<div class="date">{{post.month}} {{post.date}}</div>
+							<div class="title"><a href="#!/exams/{{post.postId}}">{{post.title}}</a></div>
+						</li>
+					</ul>
+				</div>
+				<div class="col bottom right">
+					<div class="heading">
+						<a href="#!/community"><div class="boardName env">커뮤니티</div><div class="more">더 보기</div></a>
+					</div>
+					<ul>
+						<li ng-repeat="post in HOME.community">
+							<div class="date">{{post.month}} {{post.date}}</div>
+							<div class="title"><a href="#!/community/{{post.postId}}">{{post.title}}</a></div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="HMFooterWrapper">
+		<div class="footerBox" ng-include src="'tp-footer'"></div>
+	</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

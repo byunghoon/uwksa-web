@@ -1,0 +1,183 @@
+<script type="text/ng-template" id="tp-cnode">
+<div class="commentEdit" ng-show="node.showEditCommenter" ng-init="param=node">
+	<div ng-include src="'tp-commenter'" ng-controller="EditCommenterController"></div>
+</div>
+<div class="commentNew" ng-show="!node.deleted&&node.showNewCommenter" ng-init="param=node">
+	<div ng-include src="'tp-commenter'" ng-controller="ReplyCommenterController"></div>
+</div>
+<div class="commentListItem" ng-show="!node.showEditCommenter&&!node.showNewCommenter">
+	<div ng-show="!node.deleted&&!node.showNewCommenter">
+		<div class="detail">
+			<div class="author">
+				<a href="{{generateUserLink({a:node.author, b:node.authorEmail, c:node.facebookId})}}" target="_blank" ng-bind-html-unsafe="node.author" onmouseover="angular.element(this).parent().next().css('display','inline-block')" onmouseout="angular.element(this).parent().next().css('display','none')"></a>
+			</div>
+			<div class="namecard">
+				{{generateNamecard({a:node.author, b:node.authorEmail, c:node.facebookId})}}
+			</div>
+			<div class="date">
+				{{node.date}}
+				<span ng-show="node.canEdit">
+					&middot;
+					<span class="linklet" ng-click="onEdit({cId: node.commentId})">
+						Edit
+					</span>
+				</span>
+				<span ng-show="node.canDelete">
+					&middot;
+					<span class="linklet" ng-click="onDelete({cId: node.commentId})">
+						Delete
+					</span>
+				</span>
+			</div>
+			<div class="underline"></div>
+		</div>
+		<div class="content" ng-show="!node.showEditCommenter" ng-bind-html-unsafe="doLinkify({str: node.content})"></div>
+		<div class="file" ng-show="!node.showEditCommenter&&node.files.length>0">
+			<div ng-repeat="file in node.files">
+				<span>{{file.name}}</span> <a href="{{file.address}}">Download</a>
+			</div>
+		</div>
+		<div class="reply" ng-show="canComment&&depth<2">
+			<span class="linklet" ng-click="onReply({cId: node.commentId})">Reply</span>
+		</div>
+	</div>
+	<div class="commentDeleted" ng-show="node.deleted">
+		This comment is deleted.
+	</div>
+</div>
+
+</script>
+
+
+
+<script type="text/ng-template" id="tp-editor">
+
+<div class="editorWrapper NoSelection" ng-style="{opacity: 1-(fields.submitting*0.5)}">
+	<div class="editorTitle">
+		<input ng-model="fields.title" ng-focus="{{$parent.BOARD.show.composePost||$parent.BOARD.show.editPost}}" type="text" placeholder="Title" />
+	</div> <!-- end #w2-composeTitle -->
+	<div class="editorControl" ng-include src="'tp-wysiwyg'"></div>
+	<div class="editorContent TextSelection" ng-class="{fileExists:fields.files.length>0}" ng-model="fields.content" contentEditable ng-mouseover="SetShowAvailableTags(false)"></div>
+	<div class="editorFile" ng-show="fields.files.length>0" ng-include src="'tp-file'"></div>
+	<div class="editorSelectedTags" ng-click="SetShowAvailableTags(true)">
+		<div class="selectedTags">
+			<div class="selectedTagsNone" ng-show="fields.selectedTags.length==0">click to add tags...</div>
+			<span class="selectedTagItem" ng-repeat="tag in fields.selectedTags" ng-click="OnAddRemoveTag(tag)">
+				{{tag.displayName}}
+			</span>
+		</div>
+	</div>
+	<div class="editorAvailableTags" ng-show="fields.showAvailableTags" ng-mouseover="SetShowAvailableTags(true)" ng-mouseout="SetShowAvailableTags(false)">
+		<span class="availableTagItem" ng-repeat="tag in $parent.BOARD.TAG.availableTags" ng-click="OnAddRemoveTag(tag)" ng-class="{selected:tag.selected}" >
+			{{tag.displayName}}
+		</span>
+	</div>
+	<div class="editorAction">
+		<input type="checkbox" ng-show="$parent.BOARD.canPin" ng-model="fields.pinned" ng-checked="fields.pinned" />
+		<input type="button" class="button-action" value="Submit" ng-disabled="fields.submitting" ng-click="OnEditorSubmit(fields)" />
+		<input type="button" class="button-normal" value="Cancel" ng-click="OnEditorCancel()" />
+	</div>
+</div>
+
+</script>
+
+
+
+<script type="text/ng-template" id="tp-commenter">
+
+<div class="commenterWrapper NoSelection" ng-style="{opacity: 1-(fields.submitting*0.5)}" ng-class="{shake:fields.incomplete}">
+	<div class="commenterControl" ng-include src="'tp-wysiwyg'"></div>
+	<div class="commenterContent TextSelection" ng-model="fields.content" ng-focus="{{node.showNewCommenter||node.showEditCommenter}}" contentEditable></div>
+	<div class="commenterFile" ng-show="fields.files.length>0" ng-include src="'tp-file'"></div>
+	<div class="commenterAction">
+		<input type="button" class="button-action" value="Submit" ng-disabled="fields.submitting" ng-click="OnCommenterSubmit(fields)" />
+		<input type="button" class="button-normal" value="Cancel" ng-show="showCancelButton" ng-click="OnCommenterCancel()" />
+	</div>
+</div>
+
+</script>
+
+
+
+<script type="text/ng-template" id="tp-wysiwyg">
+
+<div class="iconContainer">
+	<input type="button" class="wys-icon wys-bold" onclick="OnWysCmd('bold')" /><input type="button" class="wys-icon wys-italic" onclick="OnWysCmd('italic')" /><input type="button" class="wys-icon wys-underline" onclick="OnWysCmd('underline')" />
+</div>
+<div class="iconDivider"></div>
+<div class="iconContainer">
+	<input type="button" class="wys-icon wys-ol" onclick="OnWysCmd('insertOrderedList')" /><input type="button" class="wys-icon wys-ul" onclick="OnWysCmd('insertUnorderedList')" />
+</div>
+<div class="iconDivider"></div>
+<div class="iconContainer">
+	<input type="button" class="wys-icon wys-left" onclick="OnWysCmd('justifyLeft')" /><input type="button" class="wys-icon wys-center" onclick="OnWysCmd('justifyCenter')" /><input type="button" class="wys-icon wys-right" onclick="OnWysCmd('justifyRight')" />
+</div>
+<div class="iconDivider"></div>
+<div class="iconContainer">
+	<input type="button" class="wys-icon wys-indent" onclick="OnWysCmd('indent')" /><input type="button" class="wys-icon wys-outdent" onclick="OnWysCmd('outdent')" />
+</div>
+<div class="iconDivider"></div>
+<div class="iconContainer">
+	<input type="button" class="wys-icon wys-attach" ng-show="!supportsFileUpload" onclick="alert('File upload is not supported on Internet Explorer 9 and below. Please use a moderm browser.')" value="attach" />
+	<input type="button" class="wys-icon wys-attach" ng-show="supportsFileUpload" onmouseover="angular.element(this).next().next().css('display','block')" onmouseout="angular.element(this).next().next().css('display','none')" onclick="angular.element(this).next().html(angular.element(this).next().html());angular.element(this).next().children()[0].click();angular.element(this).scope().OnFilePromptClick()" value="attach" />
+	<form enctype="multipart/form-data">
+		<input type="file" class="uploader" multiple="multiple" onchange="angular.element(this).scope().OnFileSelect(this)" />
+	</form>
+	<div class="uploadInfo">
+		Images, documents and zip files under 50MB are allowed.
+	</div>
+</div>
+
+</script>
+
+
+
+<script type="text/ng-template" id="tp-file">
+
+<span class="fileItem" ng-repeat="file in fields.files" ng-hide="file.deleted">
+	<span class="fileName">{{file.name}}</span>
+	<span ng-show="!file.failed&&!file.isInvalidType&&!file.isInvalidSize">
+		<span class="fileUploading" ng-show="!file.onServer&&!file.uploaded">Uploading... {{file.progress}}%</span>
+		<span class="fileInsert linklet" ng-show="(file.uploaded||file.onServer)&&file.isImage" ng-click="OnFileInsertClick(file)">Insert</span>
+		<span class="fileDelete linklet" ng-show="file.uploaded||file.onServer" ng-click="OnFileDeleteClick(file)">Remove</span>
+		<span class="fileProgress" ng-show="!file.onServer&&!file.uploaded">
+			<span class="fileProgressFill" ng-style="{width: file.progress+'%'}"></span>
+		</span>
+	</span>
+	<span ng-show="file.failed"><i>Failed</i></span>
+	<span ng-show="file.isInvalidType"><i>Unknown file type</i></span>
+	<span ng-show="file.isInvalidSize"><i>File too large</i></span>
+</span>
+
+</script>
+
+
+
+<script type="text/ng-template" id="tp-footer">
+
+<div class="sponsors">
+	<div class="footerTitle">SPONSORS</div>
+	<a href="sponsors/starbucks" target="_blank"><div class="placeholder"></div></a>
+	<div class="placeholder"></div>
+	<div class="placeholder"></div>
+	<div class="placeholder"></div>
+	<div class="placeholder"></div>
+</div>
+<div class="contacts">
+	<div class="footerTitle">CONTACTS</div>
+	<div class="contactItem">
+		<b><a href="mailto:kyoojin.cho@gmail.com">kyoojin.cho@gmail.com</a></b><br />
+		Kyoojin Cho<br />
+		President, 2013-2014 UWKSA
+	</div>
+	 <div class="contactItem">
+		<b><a href="mailto:uwaterloo.ksa@gmail.com">uwaterloo.ksa@gmail.com</a></b><br />
+		UWKSA Web Team
+	</div>
+</div>
+<div class="copyright">
+	&copy; 2013 UWKSA<br />
+	<span>CMYK STUDIO</span>
+</div>
+
+</script>

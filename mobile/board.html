@@ -1,0 +1,144 @@
+<div id="BDView" ng-show="show.board">
+	<div id="BDControlWrapper" class="NoSelection">
+		<input type="button" id="BDWriteButton" value="Write" ng-show="BOARD.canPost" ng-click="BOARD.OnComposeClick()" />
+		<input type="button" id="BDWriteDisabledButton" value="Write" ng-show="!BOARD.canPost" />
+		<div class="divider"></div>
+		<input type="button" id="BDSearchButton" value="Search" ng-click="BOARD.SEARCH.OnSearchButtonClick()" />
+		<input type="button" id="BDTagButton" value="Tag Filter" ng-click="BOARD.TAG.OnTagButtonClick()" />
+	</div>
+
+	<div id="BDListWrapper">
+		<div id="BDModuleLabel" class="NoSelection" ng-show="!BOARD.SEARCH.show">{{selectedModule.fullName}}</div>
+		<div id="BDSearchBox" ng-show="BOARD.SEARCH.show">
+			<div id="BDSearchFieldWrapper"><input type="text" id="BDSearchField" ng-class="{searching:BOARD.SEARCH.searching}" ng-model="BOARD.SEARCH.inputString" ng-change="BOARD.SEARCH.OnFieldChange()" /></div>
+		</div>
+		<div id="BDSearchOptionBox" ng-show="BOARD.SEARCH.show">
+			<input type="checkbox" id="BDOptionAuthor" ng-model="BOARD.SEARCH.options.author" ng-click="BOARD.SEARCH.OnOptionChange()" /><label for="BDOptionAuthor" ng-click="BOARD.SEARCH.OnOptionChange()"> author</label>
+			<input type="checkbox" id="BDOptionTitle" ng-model="BOARD.SEARCH.options.title" ng-click="BOARD.SEARCH.OnOptionChange()" /><label for="BDOptionTitle" ng-click="BOARD.SEARCH.OnOptionChange()"> title</label>
+			<input type="checkbox" id="BDOptionContent" ng-model="BOARD.SEARCH.options.content" ng-click="BOARD.SEARCH.OnOptionChange()" /><label for="BDOptionContent" ng-click="BOARD.SEARCH.OnOptionChange()"> content</label>
+			<input type="checkbox" id="BDOptionComments" ng-model="BOARD.SEARCH.options.comments" ng-click="BOARD.SEARCH.OnOptionChange()" /><label for="BDOptionComments" ng-click="BOARD.SEARCH.OnOptionChange()"> comments</label>
+		</div>
+		<div id="BDGradientTop" ng-class="{searchShowing:BOARD.SEARCH.show}"></div>
+		<div id="BDList" ng-class="{tagShowing:BOARD.TAG.show, searchShowing:BOARD.SEARCH.show, loading:BOARD.buildingPostList&&!BOARD.posts.length}">
+			<ul>
+				<li class="empty" ng-show="!BOARD.buildingPostList&&!BOARD.posts.length">No results.</li>
+				<li ng-repeat="post in BOARD.posts" ng-class="{pinned:post.pinned, selected:BOARD.postId==post.postId, loading:post.loading}">
+					<a href="#!/{{selectedModule.address}}/{{post.postId}}">
+						<div class="listItemBox">
+							<div class="listItemLeftBox">
+								<div class="title"><span class="pinnedHeader" ng-show="post.pinned">공지</span> {{post.title}}</div>
+								<div class="detail" ng-class="{hasFiles:post.files.length>0}">
+									<span class="author" ng-bind-html-unsafe="post.author"></span>
+									<span class="date">on {{post.date}}</span>
+								</div>
+								<div class="preview">
+									{{post.pureContent}}
+								</div>
+							</div>
+							<div class="listItemRightBox">
+								<div class="comments">{{post.commentCount}}</div>
+							</div>
+						</div>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<div id="BDGradientBottom" ng-class="{tagShowing:BOARD.TAG.show}"></div>
+		<div id="BDTagBox" ng-show="BOARD.TAG.show">
+			<span ng-repeat="tag in BOARD.TAG.availableTags" ng-click="BOARD.TAG.OnTagClick(tag)" ng-class="{selected:tag.selected}">
+				{{tag.displayName}}
+			</span>
+		</div>
+		<div id="BDPager" class="NoSelection">
+			<span ng-repeat="page in BOARD.pages" ng-class="{selected:BOARD.currentPage==page.name}" ng-click="BOARD.OnPageChange(page.no)">{{page.name}}</span>
+		</div>
+	</div>
+
+	<div id="BDLoadingContent" class="ProgressBar" ng-show="!moduleLoaded"></div>
+
+	<div id="BDContentWrapper" ng-show="moduleLoaded">
+		<div id="BDNoPost" ng-show="!BOARD.show.composePost&&!BOARD.show.editPost&&!BOARD.selectedPost">
+			No post to display.
+		</div>
+		<div id="BDPost" ng-show="!BOARD.show.composePost&&!BOARD.show.editPost&&BOARD.selectedPost">
+			<div class="postBox">
+				<div class="title">{{BOARD.selectedPost.title}}</div>
+				<div class="detail">
+					<div class="author">
+						<a href="{{UTIL.GenerateUserLink(BOARD.selectedPost.author, BOARD.selectedPost.authorEmail, BOARD.selectedPost.facebookId)}}" target="_blank" ng-bind-html-unsafe="BOARD.selectedPost.author" onmouseover="angular.element(this).parent().next().css('display','inline-block')" onmouseout="angular.element(this).parent().next().css('display','none')"></a>
+					</div>
+					<div class="namecard">
+						{{UTIL.GenerateNamecard(BOARD.selectedPost.author, BOARD.selectedPost.authorEmail, BOARD.selectedPost.facebookId)}}
+					</div>
+					<div class="date">
+						<span ng-show="BOARD.selectedPost.pinned">
+							<span class="pinnedString">Pinned</span> &nbsp;&middot;&nbsp;
+						</span>
+						{{BOARD.selectedPost.fullDate}}&nbsp;
+						<span ng-show="BOARD.selectedPost.canEdit">
+							&middot;
+							<span class="linklet" ng-click="BOARD.POST.OnEditClick()">
+								Edit
+							</span>
+						</span>
+						<span ng-show="BOARD.selectedPost.canDelete">
+							&middot;
+							<span class="linklet" ng-click="BOARD.POST.OnDeleteClick()">
+								Delete
+							</span>
+						</span>
+					</div>
+					<div class="underline"></div>
+				</div>
+				<div class="content" ng-bind-html-unsafe="UTIL.Linkify(BOARD.selectedPost.content)"></div>
+				<div class="file" ng-show="BOARD.selectedPost.files.length>0">
+					<div ng-repeat="file in BOARD.selectedPost.files">
+						<span>{{file.name}}</span> <a href="{{file.address}}">Download</a>
+					</div>
+				</div>
+				<div class="tag" ng-show="BOARD.selectedPost.selectedTags.length>0">
+					<span class="linklet" ng-repeat="tag in BOARD.selectedPost.selectedTags" ng-click="BOARD.TAG.OnTagClick(tag)">
+						{{tag.displayName}}<span ng-hide="$index==BOARD.selectedPost.selectedTags.length-1">,</span>
+					</span>
+				</div>
+			</div>
+
+			<div class="commentCount">
+				{{BOARD.selectedPost.commentCount}} comments
+			</div>
+
+			<div class="commentBox">
+				<div ctree depth="0" can-comment="BOARD.selectedPost.canComment"
+					ng-model="BOARD.selectedPost.comments"
+					on-edit="BOARD.COMMENT.OnEditClick(cId)"
+					on-delete="BOARD.COMMENT.OnDeleteClick(cId)"
+					on-reply="BOARD.COMMENT.OnReplyClick(cId)"
+					do-linkify="UTIL.Linkify(str)"
+					generate-user-link="UTIL.GenerateUserLink(a, b, c)"
+					generate-namecard="UTIL.GenerateNamecard(a, b, c)"
+					ignore-next-escape="IgnoreNextEscape()"
+					upload-file="BOARD.FILE.UploadFile(file)"
+					build-added-files-list="BOARD.FILE.BuildAddedFilesList(files)"
+					build-deleted-files-list="BOARD.FILE.BuildDeletedFilesList(files)"
+					add-fields="BOARD.FILE.AddFields(files)"></div>
+				<ul class="commentUl">
+					<li class="commentLi" ng-show="BOARD.selectedPost.canComment">
+						<div class="commentNew" ng-include src="'tp-commenter'" ng-controller="MainCommenterController"></div>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<div id="BDComposePost" ng-show="BOARD.show.composePost&&!BOARD.show.editPost" ng-controller="ComposeController" ng-class="{shake:fields.incomplete}">
+			<div id="composeBox" ng-include src="'tp-editor'"></div>
+		</div>
+
+		<div id="BDEditPost" ng-show="!BOARD.show.composePost&&BOARD.show.editPost" ng-controller="EditController" ng-class="{shake:fields.incomplete}">
+			<div id="editBox" ng-include src="'tp-editor'"></div>
+		</div>
+
+		<div id="BDFooter" ng-show="!BOARD.show.composePost&&!BOARD.show.editPost">
+			<div class="footerBox" ng-include src="'tp-footer'"></div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,102 @@
+<?php
+include_once 'library.php';
+
+// Note we are not using $_POST.
+// http://victorblog.com/2012/12/20/make-angularjs-http-service-behave-like-jquery-ajax/
+$params = json_decode(file_get_contents('php://input'), true);
+$request = $params['r'];
+
+// should do safety check (null values, user permissions, etc.)
+if ($request == 'newPost') {
+	echo DBNewPost($params['bName'], $params['title'], $params['content']);
+} else if($request == 'editPost') {
+	if ($params['pId']) {
+		DBEditPost($params['pId'], $params['title'], $params['content']);
+	}
+} else if ($request == 'deletePost') {
+	DBDeletePost($params['pId']);
+} else if ($request == 'newComment') {
+	echo DBNewComment($params['parentPost'], $params['parentComment'], $params['content']);
+} else if ($request == 'editComment') {
+	DBEditComment($params['cId'], $params['content']);
+} else if ($request == 'deleteComment') {
+	DBDeleteComment($params['cId']);
+}
+
+
+
+
+
+/*
+$request = $_POST['r'];
+if($_POST['b']) $board_id = $_POST['b'];
+if($_POST['n']) $post_no = $_POST['n'];
+if($_POST['t']) $title = $purifier->purify($_POST['t']);
+if($_POST['p']) $pinned = $_POST['p'];
+if($_POST['co']) $content_original = $_POST['co'];
+if($_POST['cs']) $content_sanitized = $purifier->purify($_POST['cs']);
+if($_POST['pr']) $parent = $_POST['pr'];
+if($_POST['d']) $depth = $_POST['d'];
+if($_POST['m']) $comment_no = $_POST['m'];
+
+
+if($request=='newPost')
+{
+	if($pinned && $board_id && $title && $content_sanitized && $content_original
+		&& is_postable($board_id, $_SESSION['class']))
+	{
+		new_post(($pinned=="yes"?1:0), $board_id, $_SESSION['id'],
+			$_SESSION['name'], $title, $content_sanitized, $content_original);
+	}
+}
+else if($request=='editPost')
+{
+	if($pinned && $board_id && $post_no && $title && $content_sanitized
+		&& $content_original && is_postable($board_id, $_SESSION['class']))
+	{
+		set_pinned($post_no, ($pinned=="yes"?1:0));
+		set_title($post_no, $title);
+		set_post_content($post_no, $content_sanitized, $content_original);
+	}
+		
+}
+else if($request=='deletePost')
+{
+	if($board_id && $post_no && is_postable($board_id, $_SESSION['class']))
+	{
+		delete_post($post_no);
+	}
+}
+else if($request=='newComment')
+{
+	if($board_id && $parent && $content_sanitized && $content_original &&
+		is_commentable($board_id, $_SESSION['class']))
+	{
+		$comment['comment_no'] = new_conmment($parent, $_SESSION['id'],
+			$_SESSION['name'], $content_sanitized, $content_original);
+		$comment['user_id'] = $_SESSION['id'];
+		$comment['user_name'] = $_SESSION['name'];
+		$comment['content_sanitized'] = $content_sanitized;
+		$comment['content_original'] = $content_original;
+		$comment['date'] = time();
+		echo draw_comment_view($board_id, $comment, ($depth?$depth:0));
+	}
+}
+else if($request=='editComment')
+{
+	if($board_id && $comment_no && $content_sanitized && $content_original &&
+		is_commentable($board_id, $_SESSION['class']))
+	{
+		set_comment_content($comment_no, $content_sanitized, $content_original);
+		echo $content_sanitized;
+	}
+}
+else if($request=='deleteComment')
+{
+	if($board_id && $comment_no && is_commentable($board_id, $_SESSION['class']))
+	{
+		delete_comment($comment_no);
+	}
+}
+*/
+?>
